@@ -56,7 +56,7 @@ class Header extends Component {
 // 结合combineReducers中定义的别名
 const mapStateToProps = (state) => {
     return {
-        focused: state.header.focused
+        focused: state.header.get('focused')
     }
 }
 
