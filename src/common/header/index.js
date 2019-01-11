@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { CSSTransition } from 'react-transition-group';
+import { connect } from 'react-redux';
 import {
     WrapperHeader,
     Logo,
@@ -12,25 +13,8 @@ import {
 } from './style';
 
 class Header extends Component {
-    constructor(props) {
-        super(props);
-        this.handleInputFocus = this.handleInputFocus.bind(this);
-        this.handleInputBlur = this.handleInputBlur.bind(this);
-        this.state = {
-            focused: false
-        }
-    }
-    handleInputFocus() {
-        this.setState({
-            focused: true
-        })
-    }
-    handleInputBlur() {
-        this.setState({
-            focused: false
-        })
-    }
     render() {
+        const { focused, handleInputFocus, handleInputBlur } = this.props;
         return (
             <WrapperHeader>
                 <Logo />
@@ -43,17 +27,17 @@ class Header extends Component {
                     </NavItem>
                     <SearchWrapper>
                         <CSSTransition
-                            in={this.state.focused}
+                            in={focused}
                             timeout={200}
                             classNames="slide"
                         >
                             <NavSearch
-                                className={this.state.focused ? 'focused' : ''}
-                                onFocus={this.handleInputFocus}
-                                onBlur={this.handleInputBlur}
+                                className={focused ? 'focused' : ''}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             ></NavSearch>
                         </CSSTransition>
-                        <i className={this.state.focused ? 'focused iconfont' : 'iconfont'}>&#xe62d;</i>
+                        <i className={focused ? 'focused iconfont' : 'iconfont'}>&#xe62d;</i>
                     </SearchWrapper>
 
                 </Nav>
@@ -68,5 +52,28 @@ class Header extends Component {
         )
     }
 }
+// 结合combineReducers中定义的别名
+const mapStateToProps = (state) => {
+    return {
+        focused: state.header.focused
+    }
+}
 
-export default Header;
+const mapDispatchToProps = (dispatch) => {
+    return {
+        handleInputFocus() {
+            const action = {
+                type: 'search_focus'
+            }
+            dispatch(action);
+        },
+        handleInputBlur() {
+            const action = {
+                type: 'search_blur'
+            }
+            dispatch(action);
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
