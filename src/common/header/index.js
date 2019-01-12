@@ -9,11 +9,38 @@ import {
     NavItem,
     NavSearch,
     SearchWrapper,
+    SearchInfo,
+    SearchInfoTitle,
+    SearchInfoSwitch,
+    SearchInfoItem,
     Addition,
     Button
 } from './style';
 
 class Header extends Component {
+    getListArea() {
+        if (this.props.focused) {
+            return (
+                <SearchInfo>
+                    <SearchInfoTitle>
+                        热门搜索
+                                <SearchInfoSwitch>
+                            换一批
+                                </SearchInfoSwitch>
+                    </SearchInfoTitle>
+                    <div>
+                        {
+                            this.props.list.map((item) => {
+                                return <SearchInfoItem key={item}>{item}</SearchInfoItem>
+                            })
+                        }                       
+                    </div>
+                </SearchInfo>
+            )
+        } else {
+            return null;
+        }
+    }
     render() {
         const { focused, handleInputFocus, handleInputBlur } = this.props;
         return (
@@ -39,8 +66,8 @@ class Header extends Component {
                             ></NavSearch>
                         </CSSTransition>
                         <i className={focused ? 'focused iconfont' : 'iconfont'}>&#xe62d;</i>
+                        {this.getListArea()}
                     </SearchWrapper>
-
                 </Nav>
                 <Addition>
                     <Button className="writing">
@@ -56,13 +83,17 @@ class Header extends Component {
 // 结合combineReducers中定义的别名
 const mapStateToProps = (state) => {
     return {
-        focused: state.header.get('focused')
+        // 等价的写法
+        // focused: state.getIn(['header', 'focused'])
+        focused: state.get('header').get('focused'),
+        list: state.getIn(['header', 'list'])
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
         handleInputFocus() {
+            dispatch(actionCreators.getList());
             dispatch(actionCreators.searchFocus());
         },
         handleInputBlur() {
