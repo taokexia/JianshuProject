@@ -14,6 +14,25 @@ export const searchBlur = () => {
     }
 }
 
+export const mouseEnter = () => {
+    return {
+        type: constants.MOUSE_ENTER
+    }
+}
+
+export const mouseLeave = () => {
+    return {
+        type: constants.MOUSE_LEAVE
+    }
+}
+
+export const headerListSwitch = (page) => {
+    return {
+        type: constants.HEADER_LIST_SWITCH,
+        page
+    }
+}
+
 export const getList = () => {
     return (dispatch) => {
         axios.get('/api/headerList.json').then((res) => {
@@ -28,6 +47,7 @@ export const getList = () => {
 const getHeaderList = (data) => {
     return {
         type: constants.GET_HEADER_LIST,
-        data: fromJS(data)
+        data: fromJS(data),
+        pageTotal: Math.ceil(data.length / 10)
     }
 }

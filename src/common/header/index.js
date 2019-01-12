@@ -19,21 +19,27 @@ import {
 
 class Header extends Component {
     getListArea() {
-        if (this.props.focused) {
+        const { focused, mouseIn, list, page, pageTotal, handleMouseEnter, handleMouseLeave, hanldeListSwitch } = this.props;
+        const jsList = list.toJS(); // 要把immutable数组转为普通的js数组才能正常输出结果
+        const showList = [];
+        if(jsList.length > 0) {
+            for(var i = (page - 1) * 10; i < page * 10 && i < jsList.length; i++) {
+                showList.push(<SearchInfoItem key={jsList[i]}>{jsList[i]}</SearchInfoItem>)
+            }
+        }
+
+        if (focused || mouseIn) {
             return (
-                <SearchInfo>
+                <SearchInfo onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <SearchInfoTitle>
                         热门搜索
-                                <SearchInfoSwitch>
+                        <SearchInfoSwitch onClick={() => hanldeListSwitch(page, pageTotal, this.spinIcon)}>
+                            <i ref={(icon) => {this.spinIcon = icon}} className="iconfont spin">&#xe851;</i>
                             换一批
-                                </SearchInfoSwitch>
+                        </SearchInfoSwitch>
                     </SearchInfoTitle>
                     <div>
-                        {
-                            this.props.list.map((item) => {
-                                return <SearchInfoItem key={item}>{item}</SearchInfoItem>
-                            })
-                        }                       
+                        {showList}                    
                     </div>
                 </SearchInfo>
             )
@@ -42,7 +48,7 @@ class Header extends Component {
         }
     }
     render() {
-        const { focused, handleInputFocus, handleInputBlur } = this.props;
+        const { focused, handleInputFocus, handleInputBlur, list } = this.props;
         return (
             <WrapperHeader>
                 <Logo />
@@ -61,11 +67,11 @@ class Header extends Component {
                         >
                             <NavSearch
                                 className={focused ? 'focused' : ''}
-                                onFocus={handleInputFocus}
+                                onFocus={() => {handleInputFocus(list)}}
                                 onBlur={handleInputBlur}
                             ></NavSearch>
                         </CSSTransition>
-                        <i className={focused ? 'focused iconfont' : 'iconfont'}>&#xe62d;</i>
+                        <i className={focused ? 'focused iconfont zoom' : 'iconfont zoom'}>&#xe62d;</i>
                         {this.getListArea()}
                     </SearchWrapper>
                 </Nav>
@@ -86,18 +92,42 @@ const mapStateToProps = (state) => {
         // 等价的写法
         // focused: state.getIn(['header', 'focused'])
         focused: state.get('header').get('focused'),
-        list: state.getIn(['header', 'list'])
+        list: state.getIn(['header', 'list']),
+        mouseIn: state.getIn(['header', 'mouseIn']),
+        page: state.getIn(['header', 'page']),
+        pageTotal: state.getIn(['header', 'pageTotal'])
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleInputFocus() {
-            dispatch(actionCreators.getList());
+        handleInputFocus(list) {
+            // 只有没有数据的时候才发送请求
+            if(list.size === 0) dispatch(actionCreators.getList());
             dispatch(actionCreators.searchFocus());
         },
         handleInputBlur() {
             dispatch(actionCreators.searchBlur());
+        },
+        handleMouseEnter() {
+            dispatch(actionCreators.mouseEnter());
+        },
+        handleMouseLeave() {
+            dispatch(actionCreators.mouseLeave());
+        },
+        hanldeListSwitch(page, pageTotal, spin) {
+            // 添加动画效果
+            let originAngle = spin.style.transform.replace(/[^0-9]/ig, '');
+            if(originAngle) {
+                originAngle = parseInt(originAngle, 10);
+            } else {
+                originAngle = 0;
+            }
+            spin.style.transform = 'rotate('+(originAngle+360)+'deg)';
+            if(page < pageTotal)
+                dispatch(actionCreators.headerListSwitch(page+1));
+            else
+            dispatch(actionCreators.headerListSwitch(1));
         }
     }
 }
