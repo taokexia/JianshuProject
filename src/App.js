@@ -7,15 +7,13 @@ import Detail from './pages/detail';
 class App extends Component {
   render() {
     return (
-      <div>
-        <Header></Header>
         <BrowserRouter>
           <div>
+            <Header></Header>
             <Route path="/" exact component={Home}></Route>
             <Route path="/detail" exact component={Detail}></Route>
           </div>
         </BrowserRouter>
-      </div>
     );
   }
 }

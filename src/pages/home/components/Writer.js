@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { WriteWrapper, WriteItem } from '../style';
 
-class Writer extends Component {
+class Writer extends PureComponent {
     render() {
         return (
             <WriteWrapper>
